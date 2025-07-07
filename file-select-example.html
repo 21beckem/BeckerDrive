@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeckerDrive Test</title>
+</head>
+<body>
+    <input type="file" name="fileInput" id="fileInput" beckerdrive>
+
+    <script src="beckerdrive.js"></script>
+    <script>
+const fileInput = document.getElementById('fileInput');
+fileInput.onchange = (event) => {
+    // Access the selected files
+    const selectedFiles = event.target.files; // This is a FileList object
+
+    if (selectedFiles.length > 0) {
+        // Process the files
+        for (let i = 0; i < selectedFiles.length; i++) {
+            const file = selectedFiles[i];
+            console.log(`File Name: ${file.name}, Size: ${file.size} bytes, Type: ${file.type}`);
+
+            // Example: Read the file content (e.g., as text)
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                console.log(`File content for ${file.name}: ${e.target.result.substring(0, 100)}...`); // Log first 100 chars
+            };
+            reader.readAsText(file); // Or readAsDataURL, readAsArrayBuffer, etc.
+        }
+    } else {
+        console.log("No files selected.");
+    }
+};
+    </script>
+</body>
+</html>

@@ -59,7 +59,9 @@ body, html {
 }
 .navbar-right img#avatar {
 	max-width: 36px;
-	max-height: 36px;
+    min-width: 36px;
+    max-height: 36px;
+    min-height: 36px;
 	border-radius: 18px;
 }
 .content {
@@ -108,10 +110,12 @@ deselect {
 .file-icon {
 	max-width: 100%;
 	margin-bottom: 10px;
+	user-select: none;
 }
 .file-name {
 	font-weight: 500;
 	word-break: break-word;
+	user-select: none;
 }
 .file-card:hover {
 	box-shadow: 0 4px 12px rgba(60, 64, 67, 0.15);
@@ -223,7 +227,7 @@ deselect {
 			<input type="text" class="search-bar" placeholder="Search in Drive" oninput="searchFiles(this.value)" />
 		</div>
 		<div class="navbar-right">
-			<img id="avatar" src="https://www.w3schools.com/howto/img_avatar.png" alt="" />
+			<img id="avatar" src="" alt="" />
 		</div>
 	</div>
 
@@ -237,7 +241,7 @@ deselect {
 		<button onclick="openThisFile()">Open</button>
 	</div>
 
-	<script src="api.js"></script>
+	<script src="internal_api.js"></script>
 	<script>
 if (BeckerDrive.attemptAutoLogin()) {
 	document.getElementById('full-screen-overlay').style.display = 'flex';
@@ -281,7 +285,15 @@ function populateGrid(files) {
 		</div>
 	`).join('');
 }
+let lastClickTime = 0;
 function fileSelected(fileId) {
+	const now = Date.now();
+	if (fileId === currentlySelectedFile && now - lastClickTime < 200) { // if I just double clicked on this file
+		openThisFile();
+		return;
+	}
+
+	lastClickTime = now;
 	Array.from(document.getElementsByClassName('file-card')).forEach(el => el.classList.remove('selected'));
 	if (fileId === null) {
 		document.getElementById('file-details').style.display = 'none';
@@ -305,8 +317,18 @@ function searchFiles(query) {
 
 async function openThisFile() {
 	if (currentlySelectedFile) {
-		let f = await BeckerDrive.downloadFile(currentlySelectedFile);
-		console.log(f);
+		// show loader
+		document.getElementById('full-screen-overlay').style.display = 'flex';
+		document.getElementById('loader').style.display = 'block';
+		document.getElementById('login-btn').style.display = 'none';
+
+		// compile content
+		let cont = await BeckerDrive.downloadFile(currentlySelectedFile);
+		let f = listOfAllFiles.find(file => file.id === currentlySelectedFile)
+		f.content = cont;
+
+		// send to opener
+		window.opener.postMessage({ file: f }, '*');
 	}
 }
 	</script>
