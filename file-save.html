@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>BeckerDrive</title>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet">
+	<style>
+body, html {
+	width: 100%;
+	height: calc(100% - 40px);
+	margin: 0;
+	background-color: #f8f9fa;
+	font-family: 'Poppins', sans-serif;
+}
+.navbar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: calc(100% - 40px);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background-color: white;
+	padding: 10px 20px;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+.navbar-left {
+	display: flex;
+	align-items: center;
+	font-weight: bold;
+	font-size: 1.5em;
+}
+.navbar-left img {
+	max-width: 36px;
+	max-height: 36px;
+	margin-right: 10px;
+}
+.search-container {
+	flex: 1;
+	margin: 0 20px;
+	display: flex;
+	justify-content: center;
+}
+.search-bar {
+	width: 100%;
+	max-width: 500px;
+	padding: 10px 15px 10px 35px;
+	border: none;
+	border-radius: 25px;
+	background-color: #f1f3f4;
+	font-size: 14px;
+	background-image: url('https://upload.wikimedia.org/wikipedia/commons/5/55/Magnifying_glass_icon.svg');
+	background-repeat: no-repeat;
+	background-size: 16px;
+	background-position: 10px center;
+	margin: 0 20px;
+}
+.navbar-right img#avatar {
+	max-width: 36px;
+    min-width: 36px;
+    max-height: 36px;
+    min-height: 36px;
+	border-radius: 18px;
+}
+.content {
+	position: relative;
+	height: inherit;
+	margin-top: 60px;
+	padding: 30px 20px;
+}
+deselect {
+	cursor: default;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+#file-grid {
+	display: flex;
+	gap: 20px;
+	flex-wrap: wrap;
+	position: relative;
+	z-index: 1;
+	pointer-events: none;
+}
+.file-card {
+	pointer-events: auto;
+	width: 160px;
+	height: 180px;
+	background-color: white;
+	border-radius: 8px;
+	box-shadow: 0 1px 6px rgba(60, 64, 67, 0.1);
+	padding: 15px 10px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	font-size: 14px;
+	color: #1a73e8;
+	cursor: pointer;
+	transition: all 0.1s ease;
+}
+.file-card.selected {
+	background-color: #C2E7FF;
+	color: #32749f;
+}
+.file-icon {
+	max-width: 100%;
+	margin-bottom: 10px;
+	user-select: none;
+}
+.file-name {
+	font-weight: 500;
+	word-break: break-word;
+	user-select: none;
+}
+.file-card:hover {
+	box-shadow: 0 4px 12px rgba(60, 64, 67, 0.15);
+}
+.dropdown-icon {
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	width: 4px;
+	height: 20px;
+	background-color: #ccc;
+}
+#file-details {
+	display: flex;
+	justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    bottom: 10px;
+    left: 20px;
+    width: calc(100% - 160px);
+    background-color: #c2ffcc;
+    padding: 20px 60px;
+    border: 2.5px solid #96e97b;
+    border-radius: 15px;
+    font-size: 1em;
+    color: #519f32;
+    font-weight: bold;
+}
+#file-details button {
+	padding: 10px 20px;
+	border: inherit;
+	border-radius: inherit;
+	background-color: inherit;
+	color: inherit;
+	cursor: pointer;
+	font-size: 1em;
+	font-weight: bold;
+}
+#file-details button:hover {
+	box-shadow: 0 0 2.5px -1px #003a7f;
+}
+#file-details input {
+    padding: 10px 20px;
+    border: 2.5px solid #96e97b;
+    border-radius: 15px;
+    background-color: #f7fff8;
+    color: inherit;
+    font-size: 1em;
+    font-weight: bold;
+    margin-left: 20px;
+}
+
+#full-screen-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 9999;
+}
+#loader {
+	height: 80px;
+	aspect-ratio: 1;
+	padding: 10px;
+	border-radius: 50%;
+	box-sizing: border-box;
+	position: relative;
+	mask: conic-gradient(#000 0 0) content-box exclude,conic-gradient(#000 0 0);
+	filter: blur(12px);
+}
+#loader:before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: conic-gradient(#0000 35%, #1a73e8 ,#0000 65%);
+	animation: l1 1.5s linear infinite;
+}
+@keyframes l1 {
+  	to {rotate: 1turn}
+}
+#login-btn {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	padding: 10px 20px;
+	font-size: 1.2em;
+	background-color: white;
+	color: gray;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+}
+#login-btn img {
+	height: 1.5em;
+	margin-right: 10px;
+}
+	</style>
+</head>
+
+<body>
+	<div id="full-screen-overlay">
+		<div id="loader"></div>
+		<button id="login-btn" onclick="loginToBeckerDrive()" style="display: none;"><img src="https://img.icons8.com/fluent/512/google-logo.png" alt="">Connect to Google</button>
+	</div>
+
+	<div class="navbar">
+		<div class="navbar-left">
+			<img src="https://raw.githubusercontent.com/21beckem/becker-suite-public-assets/refs/heads/main/logo.png" alt="">
+			<span>BeckerDrive</span>
+		</div>
+		<div class="search-container">
+			<input type="text" class="search-bar" placeholder="Search in Drive" oninput="searchFiles(this.value)" />
+		</div>
+		<div class="navbar-right">
+			<img id="avatar" src="" alt="" />
+		</div>
+	</div>
+
+	<div class="content">
+		<div id="file-grid"></div>
+		<deselect onclick="fileSelected(null)"></deselect>
+	</div>
+
+	<div id="file-details">
+		<span>Save file to BeckerDrive as: &nbsp; <input type="text" id="file-name"></span>
+		<button onclick="saveThisFile()">Save</button>
+	</div>
+
+	<script src="internal_api.js"></script>
+	<script>
+if (BeckerDrive.attemptAutoLogin()) {
+	document.getElementById('full-screen-overlay').style.display = 'flex';
+	document.getElementById('loader').style.display = 'block';
+	document.getElementById('login-btn').style.display = 'none';
+	let interval = setInterval(() => {
+		if (BeckerDrive.isReady()) {
+			clearInterval(interval);
+			loginToBeckerDrive();
+		}
+	}, 100);
+} else {
+	document.getElementById('full-screen-overlay').style.display = 'flex';
+	document.getElementById('loader').style.display = 'none';
+	document.getElementById('login-btn').style.display = 'flex';
+}
+let listOfAllFiles = [];
+let fileToSave = null;
+async function loginToBeckerDrive() {
+	await BeckerDrive.login();
+	if (!BeckerDrive.accessToken) return;
+
+	// populate page
+	listOfAllFiles = await BeckerDrive.listFiles();
+	populateGrid(listOfAllFiles);
+
+	BeckerDrive.getUserProfile().then(profile => {
+		document.getElementById('avatar').src = profile.picture;
+	});
+
+    // get file info
+    window.addEventListener('message', async (event) => {
+        console.log(event.data.file);
+        if (event.data.file) {
+            fileToSave = event.data.file;
+            document.getElementById('file-name').value = event.data.file.name;
+            // hide overlay
+            document.getElementById('full-screen-overlay').style.display = 'none';
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('login-btn').style.display = 'none';
+        }
+    });
+    window.opener.postMessage({ msg: 'ready' }, '*');
+
+}
+function populateGrid(files) {
+	document.getElementById('file-grid').innerHTML = files.map(file => `
+		<div id="fileEl_${file.id}" class="file-card">
+			<img class="file-icon" src="https://www.gstatic.com/images/branding/product/1x/docs_2020q4_48dp.png" alt="Doc Icon" />
+			<div class="file-name">${file.name}</div>
+		</div>
+	`).join('');
+}
+let searchTimeout = null;
+function searchFiles(query) {
+	clearTimeout(searchTimeout);
+	searchTimeout = setTimeout(() => {
+
+		const filteredFiles = listOfAllFiles.filter(file => file.name.toLowerCase().includes( query.toLowerCase().trim() ));
+		populateGrid(filteredFiles);
+
+	}, 500);
+}
+
+async function saveThisFile() {
+    if (!fileToSave) return;
+
+    // show loader
+	document.getElementById('full-screen-overlay').style.display = 'flex';
+	document.getElementById('loader').style.display = 'block';
+	document.getElementById('login-btn').style.display = 'none';
+
+    // upload
+    await BeckerDrive.uploadFile(document.getElementById('file-name').value, fileToSave.content, fileToSave.mimeType);
+
+    // close
+    window.opener.postMessage({ msg: 'saved' }, '*');
+}
+	</script>
+</body>
+
+</html>

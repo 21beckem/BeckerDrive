@@ -21,8 +21,8 @@ class SelectBeckerFile {
     constructor(bIn) {
         this.bIn = bIn;
     }
-    async promptFile() {
-        this.popupWindow = window.open('file-select.html', 'popup', 'width=400,height=300,location=no');
+    promptFile() {
+        this.popupWindow = window.open('https://21beckem.github.io/BeckerDrive/file-select.html', 'popup', 'width=400,height=300,location=no');
         this.popupWindow.resizeTo(800,600);
         this.popupWindow.moveTo(300, 100);
         this.popupWindow.focus();
@@ -44,3 +44,35 @@ class SelectBeckerFile {
     }
 }
 document.querySelectorAll('input[type=file][beckerdrive]').forEach(el => new BeckerDriveInput(el));
+
+class BeckerDrive {
+    static saveFile(fileName, fileContent, mimeType) {
+        this.popupWindow = window.open('https://21beckem.github.io/BeckerDrive/file-save.html', 'popup', 'width=400,height=300,location=no');
+        this.popupWindow.resizeTo(800,600);
+        this.popupWindow.moveTo(300, 100);
+        this.popupWindow.focus();
+        window.addEventListener('beforeunload', () => this.popupWindow.close());
+        return new Promise((resolve, reject) => {
+            window.addEventListener('message', (event) => {
+                if (event.source === this.popupWindow) {
+                    if (event.data.msg === 'ready') {
+                        this.popupWindow.postMessage({ file: {
+                            name: fileName,
+                            content: fileContent,
+                            mimeType: mimeType
+                        } }, '*');
+                    }
+                    if (event.data.msg === 'saved') {
+                        this.popupWindow.close();
+                        resolve();
+                    }
+                }
+            });
+            this.popupWindow.addEventListener('load', () => {
+                this.popupWindow.addEventListener('unload', () => {
+                    reject( new Error('Save File Window Closed') );
+                });
+            });
+        });
+    }
+}
