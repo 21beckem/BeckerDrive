@@ -52,7 +52,6 @@ const BeckerDrive = (() => {
 				this.gapiInited = true;
 			});
 		}
-	
 		// Called when google.accounts.gsi.js loads
 		handleGisLoad() {
 			this.tokenClient = google.accounts.oauth2.initTokenClient({
@@ -72,6 +71,23 @@ const BeckerDrive = (() => {
 		isReady() {
 			return this.gapiInited && this.gisInited;
 		}
+
+		attemptAutoLogin() {
+			const savedToken = sessionStorage.getItem('gdrive_access_token');
+			const expiresAt  = parseInt(sessionStorage.getItem('gdrive_token_expires'), 10);
+			if (!savedToken || Date.now() >= expiresAt) {
+				return false;
+			}
+			if (!this.isReady()) {
+				const interval = setInterval(() => {
+					if (this.isReady()) {
+						clearInterval(interval);
+						this.login();
+					}
+				}, 100);
+			}
+			return true;
+		}
 	
 		// Prompts user to authorize and retrieves token
 		async login() {
@@ -82,7 +98,7 @@ const BeckerDrive = (() => {
 			const expiresAt  = parseInt(sessionStorage.getItem('gdrive_token_expires'), 10);
 			if (savedToken && Date.now() < expiresAt) {
 				gapi.client.setToken({ access_token: savedToken });
-				this.accessToken = savedToken;      // if you keep it on your BeckerDrive instance
+				this.accessToken = savedToken;
 				return;
 			}
 	
@@ -97,6 +113,23 @@ const BeckerDrive = (() => {
 				this.tokenClient.requestAccessToken({ prompt: 'consent' });
 			});
 		}
+
+		async getUserProfile() {
+			if (!this.accessToken) { await this.login(); }
+			const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+				headers: {
+				Authorization: `Bearer ${this.accessToken}`
+				}
+			});
+			if (!res.ok) throw new Error('Failed to fetch user profile');
+			const profile = await res.json();
+			return {
+				name: profile.name,
+				email: profile.email,
+				picture: profile.picture // ← this is the avatar URL
+			};
+		}
+
 	
 		// List files in BeckerSuite folder (optionally by filename)
 		async listFiles( name = null ) {
