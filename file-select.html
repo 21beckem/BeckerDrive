@@ -143,6 +143,7 @@ deselect {
     font-size: 1em;
     color: #32749f;
     font-weight: bold;
+	z-index: 10;
 }
 #file-details button {
 	padding: 10px 20px;
@@ -208,6 +209,31 @@ deselect {
 #login-btn img {
 	height: 1.5em;
 	margin-right: 10px;
+}
+@media (max-width: 768px) {
+    .search-container {
+		display: none;
+    }
+    .search-bar {
+        width: 100%;
+        max-width: none;
+    }
+    .file-card {
+		width: 100px;
+		height: 130px;
+        margin-bottom: 10px;
+    }
+    #file-details {
+        flex-direction: column;
+        align-items: flex-start;
+		padding: 20px 10px;
+		width: calc(100% - 62px);
+		align-items: stretch;
+        bottom: 20px;
+    }
+    #file-details span {
+		margin-bottom: 20px;
+    }
 }
 	</style>
 </head>
